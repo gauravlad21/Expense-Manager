@@ -27,7 +27,7 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String s = " CREATE TABLE " + TABLE_EXPENSE + "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + COLUMN_DATE + " TEXT, " + COLUMN_COMMENT + " TEXT, " +  COLUMN_EXP + " INTEGER " + ");";
+                + COLUMN_DATE + " DATE, " + COLUMN_COMMENT + " TEXT, " +  COLUMN_EXP + " INTEGER " + ");";
         db.execSQL(s);
     }
 
@@ -47,6 +47,9 @@ public class DBHelper extends SQLiteOpenHelper {
          values.put(COLUMN_EXP, (product.getMoney()));
          values.put(COLUMN_COMMENT, product.getComment());
          db.insert(TABLE_EXPENSE, null, values);
+
+         sortByDate();
+
          db.close();
      }else{
          Log.d("d", "Already Exist!!!");
@@ -101,7 +104,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         String dbString = "";
         SQLiteDatabase db = getWritableDatabase();
-        String query = "SELECT * FROM "+ TABLE_EXPENSE + " WHERE 1=1 ";
+        String query = "SELECT * FROM "+ TABLE_EXPENSE + " ORDER BY " + COLUMN_DATE;
 
         //CURSOR POINT TO A LOCATION IN YOUR RESULTS
         Cursor c = db.rawQuery(query, null);
@@ -173,17 +176,26 @@ public class DBHelper extends SQLiteOpenHelper {
         // WHY IT IS NOT HAPPENING?????
     }
 
+    /*----------> No Use at ALL!!!!
     void sortByDate(){
         SQLiteDatabase db = getWritableDatabase();
-        String query = "SELECT * FROM "+ TABLE_EXPENSE + " ORDER BY " + COLUMN_DATE ;
+        String query = "Error In Query";
+        Cursor c = null;
+        try {
+            //query = "SELECT * FROM " + TABLE_EXPENSE + " ORDER BY " + COLUMN_DATE ;
+            c = db.query(TABLE_EXPENSE, null, null, null, null, null, COLUMN_DATE+" DESC");
+            Log.d("d", "sortByDate!!!");
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        //SELECT * FROM Table ORDER BY date(dateColumn)
 
-        Log.d("d", "sortByDate!!!");
-        Cursor c = db.rawQuery(query, null);
+        //Cursor c = db.rawQuery(query, null);
         c.moveToFirst();
-
+        Log.d("d", "After Query sorted");
         databsetoString();
     }
-
+*/
     String showDataBetweenTwoDates(String from, String to){
 
         String returnString = "";
