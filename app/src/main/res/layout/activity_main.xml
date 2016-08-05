@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#800080"
+    tools:context="com.example.gauravlad.expense_daily.MainActivity">
+
+    <Button
+        android:onClick="clicked"
+        android:layout_marginTop="100dp"
+        android:background="#00b300"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="Total Expense!!!"
+        android:id="@+id/bByDay"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:background="#00b300"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="Enter Data"
+        android:id="@+id/bData"
+        android:layout_below="@+id/bByDay"
+        android:layout_alignStart="@+id/bByDay"
+        android:layout_marginTop="30dp" />
+
+    <Button
+        android:layout_marginTop="30dp"
+        android:background="#00b300"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="ATM"
+        android:id="@+id/bATM"
+        android:layout_below="@+id/bData"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ff09ff"
+    >
+
+    <EditText
+        android:gravity="center"
+        android:hint="Tap here to select date(dd/mm/yyyy)"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:id="@+id/etInputDate"
+        android:onClick="setDate"
+        />
+
+    <EditText
+        android:hint="Your expense"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:id="@+id/etInput"
+        />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="Your comment"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:id="@+id/etComment"
+        />
+
+    <Button
+        android:layout_margin="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add"
+        android:id="@+id/bAdd"
+        android:onClick="addButtonClick"
+        android:layout_gravity="center_horizontal" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete"
+        android:layout_gravity="center"
+        android:id="@+id/bDelete"
+        android:onClick="deleteButtonClick"
+        />
+
+    <TextView
+        android:layout_marginTop="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="Text"
+        android:id="@+id/tv"
+        android:layout_gravity="center"
+        android:textSize="20sp"
+        style="@style/AlertDialog.AppCompat.Light"
+        />
+
+    <Button
+        android:layout_marginTop="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Minus"
+        android:id="@+id/bMinus"
+        android:layout_gravity="center_horizontal"
+        android:onClick="MinusButtonClicked"
+        />
+
+</LinearLayout>

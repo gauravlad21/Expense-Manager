@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="vertical"
+    >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="by day"
+        android:id="@+id/textView3"
+        android:layout_gravity="center_horizontal" />
+
+    <EditText
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:hint="Enter Date"
+        android:id="@+id/etForDay"
+        android:onClick="setDate"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="show"
+        android:id="@+id/bShoow"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="You will see your result here!!!"
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp"
+        android:id="@+id/tvData"
+        />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:hint="Enter Month"
+        android:id="@+id/etForMonth"
+        android:inputType="number"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="show"
+        android:id="@+id/bShow"
+        />
+    <TextView
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="You will see your result here!!!"
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp"
+        android:id="@+id/tvData2"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="show sorted database"
+        android:id="@+id/bSDB"
+        android:layout_gravity="center_horizontal" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="sorted databse"
+        android:id="@+id/tvsdb"
+        android:layout_gravity="center_horizontal" />
+
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:hint="Enter Month"
+        android:id="@+id/etFrom"
+        />
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:hint="Enter Month"
+        android:id="@+id/etTo"
+        />
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="show database between two dates"
+        android:id="@+id/bShoooow"
+        android:layout_gravity="center_horizontal" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="show database between two dates"
+        android:id="@+id/tvShooow"
+        android:layout_gravity="center_horizontal" />
+
+</LinearLayout>
