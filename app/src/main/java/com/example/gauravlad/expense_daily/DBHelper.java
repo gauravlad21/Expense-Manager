@@ -13,6 +13,8 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VIRSON = 1;
     private static final String DATABASE_NAME = "expense.db";
     private static final String TABLE_EXPENSE = "expense";
+    private static final String TABLE_INCOME = "income";
+    private static final String COLUMN_ATM = "_atm";
     private static final String COLUMN_ID = "_id";
     private static final String COLUMN_DATE = "_date";
     private static final String COLUMN_COMMENT = "_comment";
@@ -27,28 +29,29 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String s = " CREATE TABLE " + TABLE_EXPENSE + "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + COLUMN_DATE + " DATE, " + COLUMN_COMMENT + " TEXT, " +  COLUMN_EXP + " INTEGER " + ");";
+                + COLUMN_DATE + " DATETIME, " + COLUMN_COMMENT + " TEXT, " +  COLUMN_EXP + " INTEGER " + ");";
+        String newstring = "CREATE TABLE " + TABLE_INCOME + " ( " + COLUMN_DATE + " Date, " +COLUMN_ATM + " INTEGER );";
         db.execSQL(s);
+        db.execSQL(newstring);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(" DROP TABLE IF EXISTS " + TABLE_EXPENSE);
+        db.execSQL(" DROP TABLE IF EXISTS " + TABLE_INCOME);
         onCreate(db);
     }
 
     //Add new Row to database
     public void addMoney(Expense product){
 
-     if(!isExist(String.valueOf(product.getDate()))) {
+     if(!isExist(String.valueOf(product.getDate()), TABLE_EXPENSE ) ) {
          SQLiteDatabase db = getWritableDatabase();
          ContentValues values = new ContentValues();
          values.put(COLUMN_DATE, String.valueOf(product.getDate()));
          values.put(COLUMN_EXP, (product.getMoney()));
          values.put(COLUMN_COMMENT, product.getComment());
          db.insert(TABLE_EXPENSE, null, values);
-
-         sortByDate();
 
          db.close();
      }else{
@@ -71,7 +74,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public void MinusMoney(Expense product){
 
-        if(isExist(String.valueOf(product.getDate()))) {
+        if(isExist(String.valueOf(product.getDate()), TABLE_EXPENSE ) ) {
 
             Log.d("d", "Already Exist!!!");
             Log.d("d", String.valueOf(product.getMoney())+" new");
@@ -104,7 +107,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         String dbString = "";
         SQLiteDatabase db = getWritableDatabase();
-        String query = "SELECT * FROM "+ TABLE_EXPENSE + " ORDER BY " + COLUMN_DATE;
+        String query = "SELECT * FROM "+ TABLE_EXPENSE + " ORDER BY " + COLUMN_DATE + " DESC";
 
         //CURSOR POINT TO A LOCATION IN YOUR RESULTS
         Cursor c = db.rawQuery(query, null);
@@ -124,9 +127,9 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     // if record is exist then it will return true otherwise this method returns false
-    public boolean isExist(String date) {
+    public boolean isExist(String date, String Table) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cur = db.rawQuery("SELECT * FROM " + TABLE_EXPENSE + " WHERE " + COLUMN_DATE + " = '" + date + "'", null);
+        Cursor cur = db.rawQuery("SELECT * FROM " + Table+ " WHERE " + COLUMN_DATE + " = '" + date + "'", null);
         boolean exist = (cur.getCount() > 0);
         cur.close();
         db.close();
@@ -136,7 +139,7 @@ public class DBHelper extends SQLiteOpenHelper {
     void showDetail(String date, TextView textView){
         Log.d("d", date+" received!!!");
 
-        if(isExist(date)) {
+        if(isExist(date , TABLE_EXPENSE) ) {
             SQLiteDatabase db = this.getWritableDatabase();
             String query = "SELECT * FROM " + TABLE_EXPENSE + " WHERE " + COLUMN_DATE + " = '" + date + "'";
             Cursor c = db.rawQuery(query, null);
@@ -176,32 +179,12 @@ public class DBHelper extends SQLiteOpenHelper {
         // WHY IT IS NOT HAPPENING?????
     }
 
-    /*----------> No Use at ALL!!!!
-    void sortByDate(){
-        SQLiteDatabase db = getWritableDatabase();
-        String query = "Error In Query";
-        Cursor c = null;
-        try {
-            //query = "SELECT * FROM " + TABLE_EXPENSE + " ORDER BY " + COLUMN_DATE ;
-            c = db.query(TABLE_EXPENSE, null, null, null, null, null, COLUMN_DATE+" DESC");
-            Log.d("d", "sortByDate!!!");
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        //SELECT * FROM Table ORDER BY date(dateColumn)
-
-        //Cursor c = db.rawQuery(query, null);
-        c.moveToFirst();
-        Log.d("d", "After Query sorted");
-        databsetoString();
-    }
-*/
     String showDataBetweenTwoDates(String from, String to){
 
         String returnString = "";
 
         SQLiteDatabase db = getWritableDatabase();
-        String query = "SELECT * FROM " + TABLE_EXPENSE + " WHERE " + COLUMN_DATE + " = '" + from + " '";
+        String query = "SELECT * FROM " + TABLE_EXPENSE + " WHERE " + COLUMN_DATE + " >= '" + from + " ' AND " + COLUMN_DATE + " <= " + to ;
 
         Cursor c = db.rawQuery(query, null);
         c.moveToFirst();
@@ -220,4 +203,63 @@ public class DBHelper extends SQLiteOpenHelper {
         return returnString+"gauravlad";
     }
 
+    public void addToATM(ATM product) {
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor c=null;
+        if(!isExist(String.valueOf(product.getDate()) , TABLE_INCOME) ){
+
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_DATE, String.valueOf(product.getDate()));
+            values.put(COLUMN_ATM, String.valueOf(product.getMoney()));
+            db.insert(TABLE_INCOME, null, values);
+            db.close();
+    }
+        else{
+            Log.d("d", "Already Exist!!!");
+            Log.d("d", String.valueOf(product.getMoney())+" new");
+
+            String query = "SELECT * FROM " + TABLE_EXPENSE + " WHERE " + COLUMN_DATE + "='" + product.getDate() + "'";
+
+            c = db.rawQuery(query, null);
+            c.moveToFirst();
+
+            String s = "UPDATE " + TABLE_EXPENSE + " SET " + COLUMN_EXP + "='" + (product.getMoney() + Integer.parseInt(c.getString(3))) + "' WHERE " + COLUMN_DATE + "='" + product.getDate() + "';";
+            c = db.rawQuery(s, null);
+            c.moveToFirst();//It is important
+        }
+
+    }
+
+    public String shoToATM(ATM product){
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor c = null;
+        String returnString = "No data found!!!";
+
+        if(!isExist(String.valueOf(product.getDate()), TABLE_INCOME )) {
+            String query = " SELECT * FROM " + TABLE_INCOME + " WHERE 1=1 ";
+            try {
+                c = db.rawQuery(query, null);
+                c.moveToFirst();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            while (!c.isAfterLast()) {
+                if (c.getString(c.getColumnIndex(COLUMN_ATM)) != null && c.getString(c.getColumnIndex(COLUMN_DATE)) != null) {
+                    returnString += c.getString(c.getColumnIndex(COLUMN_ATM)) + "<-->" + c.getString(c.getColumnIndex(COLUMN_DATE)) + "\n";
+                }
+                c.moveToNext();
+            }
+        }
+        db.close();
+        return returnString;
+    }
+
+    //For Date
+    String doubleDigit(String x){
+        if(x.length() == 1)
+            return "0"+x;
+        else
+            return x ;
+    }
 }

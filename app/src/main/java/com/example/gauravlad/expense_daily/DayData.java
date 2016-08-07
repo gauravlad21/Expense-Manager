@@ -75,14 +75,6 @@ public class DayData extends Activity{
             }
         });
 
-        bSSDB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dbHelper.sortByDate();
-            }
-        });
-
-
         bShooow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -125,8 +117,8 @@ public class DayData extends Activity{
     };
 
     private void showDate(int year, int month, int day) {
-        etForDate.setText(new StringBuilder().append(day).append("/")
-                .append(month).append("/").append(year));
+        etForDate.setText(new StringBuilder().append(year).append("/")
+                .append(month).append("/").append(day));
     }
 
     //--------------------end of date dialogue!!!

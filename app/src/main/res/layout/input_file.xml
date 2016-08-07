@@ -5,7 +5,7 @@
     android:background="#ff09ff"
     >
 
-    <EditText
+    <TextView
         android:gravity="center"
         android:hint="Tap here to select date(dd/mm/yyyy)"
         android:layout_width="match_parent"

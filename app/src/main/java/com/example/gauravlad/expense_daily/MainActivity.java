@@ -27,6 +27,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        bATM.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getApplicationContext(), DataOfATM.class);
+                startActivity(i);
+            }
+        });
+
     }
 
     public void clicked(View view){

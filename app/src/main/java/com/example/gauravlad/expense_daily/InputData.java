@@ -22,10 +22,10 @@ public class InputData extends Activity {
 
     DBHelper dbHelper;
     Button bAdd, bMinus;
-    EditText etInput, etInputDate, etComment;
+    EditText etInput,  etComment;
     Calendar calendar;
     int month, day, year;
-    TextView tv;
+    TextView tv, etInputDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +34,7 @@ public class InputData extends Activity {
 
         bAdd = (Button) findViewById(R.id.bAdd);
         bMinus = (Button) findViewById(R.id.bMinus);
-        etInputDate = (EditText)findViewById(R.id.etInputDate);
+        etInputDate = (TextView)findViewById(R.id.etInputDate);
         etInput = (EditText)findViewById(R.id.etInput);
         etComment = (EditText)findViewById(R.id.etComment);
         tv = (TextView)findViewById(R.id.tv);
@@ -78,8 +78,8 @@ public class InputData extends Activity {
     };
 
     private void showDate(int year, int month, int day) {
-        etInputDate.setText(new StringBuilder().append(day).append("/")
-                .append(month).append("/").append(year));
+        etInputDate.setText(new StringBuilder().append(dbHelper.doubleDigit(""+year)).append("/")
+                .append(dbHelper.doubleDigit(""+month)).append("/").append(dbHelper.doubleDigit(""+day)));
     }
 
     public void addButtonClick(View view){
