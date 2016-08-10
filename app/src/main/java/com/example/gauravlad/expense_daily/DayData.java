@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -19,12 +20,13 @@ import java.util.Date;
 
 public class DayData extends Activity{
 
+    int idOfDialogue = 0;
     DBHelper dbHelper;
-    Button bShow, bshowMonth, bSSDB, bShooow;
+    Button bShow, bshowMonth, bShooow;
     Calendar calendar;
     int year, month, day;
-    EditText etForDate, etForMonth, etFrom, etTo;
-    TextView tvData, tvData2, tvSDB, tvShooow;
+    EditText  etForMonth;
+    TextView tvData, tvData2, tvShooow, etForDate,etFrom, etTo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,17 +34,15 @@ public class DayData extends Activity{
         setContentView(R.layout.by_day);
 
         etForMonth = (EditText) findViewById(R.id.etForMonth);
-        etForDate = (EditText)findViewById(R.id.etForDay);
-        etTo = (EditText)findViewById(R.id.etTo);
-        etFrom = (EditText)findViewById(R.id.etFrom);
+        etForDate = (TextView)findViewById(R.id.etForDay);
+        etTo = (TextView)findViewById(R.id.etTo);
+        etFrom = (TextView)findViewById(R.id.etFrom);
         bshowMonth = (Button) findViewById(R.id.bShow);
         bShow = (Button) findViewById(R.id.bShoow);
         bShooow = (Button) findViewById(R.id.bShoooow);
-        bSSDB = (Button) findViewById(R.id.bSDB);
         tvData = (TextView) findViewById(R.id.tvData);
-        tvShooow = (TextView) findViewById(R.id.tvShooow);
         tvData2 = (TextView)findViewById(R.id.tvData2);
-        tvSDB = (TextView) findViewById(R.id.tvsdb);
+        tvShooow = (TextView) findViewById(R.id.tvShooow);
 
         dbHelper = new DBHelper(getApplicationContext(), null, null, 1);
 
@@ -68,37 +68,48 @@ public class DayData extends Activity{
                 if ( dataMonth.length() == 0 || Integer.parseInt(dataMonth) <=0 || Integer.parseInt(dataMonth) >12 ){
                     Toast.makeText(getApplicationContext(), "Please Put Correct Month!!!", Toast.LENGTH_SHORT).show();
                 }else{
-                    String s = "/"+dataMonth+"/";
+                    String s = "/"+dbHelper.doubleDigit(dataMonth)+"/";
                     Log.d("d", s);
                     tvData2.setText( "Your Expenses in " + whichMonth(dataMonth) +" month is : " + dbHelper.dataFromMonth(s) ); //why i cant sent textview in other class method??
                 }
             }
         });
 
-        bShooow.setOnClickListener(new View.OnClickListener() {
+        bShooow.setOnClickListener(new View.OnClickListener() {//Data between two dates!!!
             @Override
             public void onClick(View v) {
                 String from = etFrom.getText().toString();
                 String to = etTo.getText().toString();
 
-                tvShooow.setText( dbHelper.showDataBetweenTwoDates(from , to) );
+                tvShooow.setText( dbHelper.showDataBetweenTwoDates(from , to) + "" );
+
+                Log.d("d", "Entered in DataBetweenTwoDates!!!");
             }
         });
+
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
     }
     //----------end of onCreate Method!!!
 
 
-    public void setDate(View view) {
+    public void setDate1(View view) {
         showDialog(99);
+    }
+    public void setDate2(View view) {
+        showDialog(33);
+    }
+    public void setDate3(View view) {
+        showDialog(11);
     }
 
     @Override
     protected Dialog onCreateDialog(int id) {
         // TODO Auto-generated method stub
-        if (id == 99) {
+        if (id == 99 || id == 11 || id == 33) {
             //return new DatePickerDialog(this, myDateListener, year, month, day);
 
+            idOfDialogue = id;
             //cant select date after today!!!!
             DatePickerDialog dialog = new DatePickerDialog(this, myDateListener, year, month, day);
             dialog.getDatePicker().setMaxDate(new Date().getTime());
@@ -117,8 +128,22 @@ public class DayData extends Activity{
     };
 
     private void showDate(int year, int month, int day) {
-        etForDate.setText(new StringBuilder().append(year).append("/")
-                .append(month).append("/").append(day));
+        switch (idOfDialogue) {
+            case 99: {
+                etForDate.setText(new StringBuilder().append(dbHelper.doubleDigit("" + year)).append("/")
+                        .append(dbHelper.doubleDigit("" + month)).append("/").append(dbHelper.doubleDigit("" + day)));
+                break;
+            }case 33:{
+                etFrom.setText(new StringBuilder().append(dbHelper.doubleDigit("" + year)).append("/")
+                        .append(dbHelper.doubleDigit("" + month)).append("/").append(dbHelper.doubleDigit("" + day)));
+                break;
+            }case 11:{
+                etTo.setText(new StringBuilder().append(dbHelper.doubleDigit("" + year)).append("/")
+                        .append(dbHelper.doubleDigit("" + month)).append("/").append(dbHelper.doubleDigit("" + day)));
+                break;
+            }
+        }
+        idOfDialogue = 0;
     }
 
     //--------------------end of date dialogue!!!

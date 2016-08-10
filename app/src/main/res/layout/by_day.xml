@@ -3,23 +3,18 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:scrollbars="vertical"
+    android:background="#17C5DE"
     >
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="by day"
-        android:id="@+id/textView3"
-        android:layout_gravity="center_horizontal" />
-
-    <EditText
-        android:layout_width="100dp"
+        android:layout_marginTop="50dp"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
         android:hint="Enter Date"
+        android:onClick="setDate1"
         android:id="@+id/etForDay"
-        android:onClick="setDate"
         />
 
     <Button
@@ -55,45 +50,35 @@
         android:text="show"
         android:id="@+id/bShow"
         />
-    <TextView
-        android:gravity="center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:hint="You will see your result here!!!"
-        android:layout_gravity="center"
-        android:layout_marginTop="30dp"
-        android:id="@+id/tvData2"
-        />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="show sorted database"
-        android:id="@+id/bSDB"
-        android:layout_gravity="center_horizontal" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="sorted databse"
-        android:id="@+id/tvsdb"
+        android:id="@+id/tvData2"
         android:layout_gravity="center_horizontal" />
 
 
-    <EditText
-        android:layout_width="wrap_content"
+    <TextView
+        android:layout_marginTop="20dp"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
-        android:hint="Enter Month"
+        android:hint="From"
+        android:onClick="setDate2"
         android:id="@+id/etFrom"
         />
-    <EditText
-        android:layout_width="wrap_content"
+    <TextView
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
-        android:hint="Enter Month"
+        android:hint="To"
+        android:onClick="setDate3"
         android:id="@+id/etTo"
         />
 

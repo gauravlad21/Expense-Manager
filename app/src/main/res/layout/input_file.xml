@@ -34,7 +34,6 @@
         />
 
     <Button
-        android:layout_margin="20dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Add"
@@ -45,31 +44,40 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Minus"
+        android:id="@+id/bMinus"
+        android:layout_gravity="center_horizontal"
+        android:onClick="MinusButtonClicked"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Delete"
-        android:layout_gravity="center"
+        android:layout_gravity="center_horizontal"
         android:id="@+id/bDelete"
         android:onClick="deleteButtonClick"
+        />
+
+    <TextView
+        android:scrollbars = "vertical"
+        android:maxLines="5"
+        android:layout_marginTop="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="Text"
+        android:id="@+id/tv"
+        android:layout_gravity="center_horizontal"
+        android:textSize="20sp"
+        style="@style/AlertDialog.AppCompat.Light"
         />
 
     <TextView
         android:layout_marginTop="20dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="Text"
-        android:id="@+id/tv"
-        android:layout_gravity="center"
-        android:textSize="20sp"
-        style="@style/AlertDialog.AppCompat.Light"
-        />
-
-    <Button
-        android:layout_marginTop="20dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Minus"
-        android:id="@+id/bMinus"
-        android:layout_gravity="center_horizontal"
-        android:onClick="MinusButtonClicked"
-        />
+        android:text="Balance"
+        android:id="@+id/tvForBalance"
+        android:layout_gravity="center_horizontal" />
 
 </LinearLayout>

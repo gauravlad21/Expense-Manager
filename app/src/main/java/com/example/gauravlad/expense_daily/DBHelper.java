@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 import android.widget.TextView;
 
 public class DBHelper extends SQLiteOpenHelper {
@@ -53,17 +52,17 @@ public class DBHelper extends SQLiteOpenHelper {
          values.put(COLUMN_COMMENT, product.getComment());
          db.insert(TABLE_EXPENSE, null, values);
 
-         db.close();
+          
      }else{
-         Log.d("d", "Already Exist!!!");
-         Log.d("d", String.valueOf(product.getMoney())+" new");
+         ////Log.d("d", "Already Exist!!!");
+         ////Log.d("d", String.valueOf(product.getMoney())+" new");
          SQLiteDatabase db =  getWritableDatabase();
 
          String query = "SELECT * FROM " + TABLE_EXPENSE + " WHERE " + COLUMN_DATE + "='" + product.getDate() + "'";
 
          Cursor c = db.rawQuery(query, null);
          c.moveToFirst();
-         Log.d("d", c.getString(3)+" old");
+         ////Log.d("d", c.getString(3)+" old");
 
          String s = "UPDATE " + TABLE_EXPENSE + " SET " + COLUMN_EXP + "='" + (product.getMoney() + Integer.parseInt(c.getString(3))) + "' WHERE " + COLUMN_DATE + "='" + product.getDate() + "';";
          c = db.rawQuery(s, null);
@@ -76,8 +75,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
         if(isExist(String.valueOf(product.getDate()), TABLE_EXPENSE ) ) {
 
-            Log.d("d", "Already Exist!!!");
-            Log.d("d", String.valueOf(product.getMoney())+" new");
+           // //Log.d("d", "Already Exist!!!");
+           // //Log.d("d", String.valueOf(product.getMoney())+" new");
             SQLiteDatabase db =  getWritableDatabase();
 
             String query = "SELECT * FROM " + TABLE_EXPENSE + " WHERE " + COLUMN_DATE + "='" + product.getDate() + "'";
@@ -90,21 +89,24 @@ public class DBHelper extends SQLiteOpenHelper {
                 String s = "UPDATE " + TABLE_EXPENSE + " SET " + COLUMN_EXP + "='" + ans + "' WHERE " + COLUMN_DATE + "='" + product.getDate() + "';";
                 c = db.rawQuery(s, null);
                 c.moveToFirst();//It is important
-            }else
-                Log.d("d", "Couldn't be done because substraction is more!!!");
+            }else {
+                //Log.d("d", "Couldn't be done because substraction is more!!!");
+                //do nothing
+            }
         }
     }
 
     public void deleteMoney(String input){
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL(" DELETE FROM " +  TABLE_EXPENSE + " WHERE " + COLUMN_DATE + "='" + input + "'");
-        Log.d("d", "DELETED FROM SQLite DATABASE!!!");
+        ////Log.d("d", "DELETED FROM SQLite DATABASE!!!");
     }
 
-    public String databsetoString(){
+    public String databsetoString(int x){
 
-        Log.d("d", "DatabaseToString!!!");
+        ////Log.d("d", "DatabaseToString!!!");
 
+        int ans=0;
         String dbString = "";
         SQLiteDatabase db = getWritableDatabase();
         String query = "SELECT * FROM "+ TABLE_EXPENSE + " ORDER BY " + COLUMN_DATE + " DESC";
@@ -118,12 +120,14 @@ public class DBHelper extends SQLiteOpenHelper {
             if(c.getString(c.getColumnIndex(COLUMN_EXP)) != null && c.getString(c.getColumnIndex(COLUMN_COMMENT)) != null && c.getString(c.getColumnIndex(COLUMN_DATE)) != null) {
                 dbString += c.getString(c.getColumnIndex(COLUMN_EXP)) +"..."+ c.getString(c.getColumnIndex(COLUMN_COMMENT)) +"..."+  c.getString(c.getColumnIndex(COLUMN_DATE));
                 dbString += "\n";
+                ans += Integer.parseInt(c.getString(c.getColumnIndex(COLUMN_EXP)));
             }
             c.moveToNext();
         }
-        Log.d("d", "...\n"+dbString+"...");
+        //Log.d("d", "...\n"+dbString+"...");
         c.close();
-        return dbString;
+
+        return (x==1)?dbString:""+ans;
     }
 
     // if record is exist then it will return true otherwise this method returns false
@@ -132,12 +136,12 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor cur = db.rawQuery("SELECT * FROM " + Table+ " WHERE " + COLUMN_DATE + " = '" + date + "'", null);
         boolean exist = (cur.getCount() > 0);
         cur.close();
-        db.close();
+         
         return exist;
     }
 
     void showDetail(String date, TextView textView){
-        Log.d("d", date+" received!!!");
+        ////Log.d("d", date+" received!!!");
 
         if(isExist(date , TABLE_EXPENSE) ) {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -147,7 +151,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
             textView.setText(" Your amount on " + date + " is: " + c.getString(c.getColumnIndex(COLUMN_EXP)) + " \nComment:  " + c.getString(c.getColumnIndex(COLUMN_COMMENT)));
         }else{
-            Log.d("d", "No data found!!!");
+            //Log.d("d", "No data found!!!");
         }
 
     }
@@ -166,25 +170,25 @@ public class DBHelper extends SQLiteOpenHelper {
         while(!c.isAfterLast()){
 
             if (c.getString(c.getColumnIndex(COLUMN_DATE)).contains(dataMonth) ){
-                Log.d("d", c.getString(c.getColumnIndex(COLUMN_EXP)) + "<-- This is expense!!!" );
+                //Log.d("d", c.getString(c.getColumnIndex(COLUMN_EXP)) + "<-- This is expense!!!" );
                 sum += Integer.parseInt( c.getString(c.getColumnIndex(COLUMN_EXP)) ) ;
             }
 
             c.moveToNext();
         }
-        Log.d("d", "Month-->"+sum+"<--");
+       // //Log.d("d", "Month-->"+sum+"<--");
         c.close();
         return ""+sum;
         //textView.setText(sum);
         // WHY IT IS NOT HAPPENING?????
     }
 
-    String showDataBetweenTwoDates(String from, String to){
+    int showDataBetweenTwoDates(String from, String to){
 
-        String returnString = "";
+        int returnString = 0;
 
         SQLiteDatabase db = getWritableDatabase();
-        String query = "SELECT * FROM " + TABLE_EXPENSE + " WHERE " + COLUMN_DATE + " >= '" + from + " ' AND " + COLUMN_DATE + " <= " + to ;
+        String query = "SELECT * FROM " + TABLE_EXPENSE + " WHERE " + COLUMN_DATE + " between '" + from + "' AND '" + to + "'";
 
         Cursor c = db.rawQuery(query, null);
         c.moveToFirst();
@@ -192,74 +196,78 @@ public class DBHelper extends SQLiteOpenHelper {
         while(!c.isAfterLast()){
             if(c.getString(c.getColumnIndex(COLUMN_EXP)) != null && c.getString(c.getColumnIndex(COLUMN_COMMENT)) != null && c.getString(c.getColumnIndex(COLUMN_DATE)) != null) {
 
-                Log.d("d", "Enter in showDataBetweenTwoDates if condition.......!!!!");
+                //Log.d("d", "Enter in showDataBetweenTwoDates if condition.......!!!!");
 
-                returnString += c.getString(c.getColumnIndex(COLUMN_EXP)) + c.getString(c.getColumnIndex(COLUMN_COMMENT)) + c.getString(c.getColumnIndex(COLUMN_DATE));
-                returnString += "\n";
+                returnString += Integer.parseInt(c.getString(c.getColumnIndex(COLUMN_EXP)));
             }
             c.moveToNext();
         }
 
-        return returnString+"gauravlad";
+        //Log.d("d", returnString+"Returned!!!");
+        return returnString;
     }
 
     public void addToATM(ATM product) {
         SQLiteDatabase db = getWritableDatabase();
-        Cursor c=null;
+
         if(!isExist(String.valueOf(product.getDate()) , TABLE_INCOME) ){
 
             ContentValues values = new ContentValues();
             values.put(COLUMN_DATE, String.valueOf(product.getDate()));
             values.put(COLUMN_ATM, String.valueOf(product.getMoney()));
+
+           // //Log.e("d", "insert!!!!");
             db.insert(TABLE_INCOME, null, values);
-            db.close();
+
     }
-        else{
-            Log.d("d", "Already Exist!!!");
-            Log.d("d", String.valueOf(product.getMoney())+" new");
+        else {
+            Cursor c=null;
+           // //Log.d("d", "Already Exist!!!");
+            ////Log.d("d", String.valueOf(product.getMoney()) + " new");
 
-            String query = "SELECT * FROM " + TABLE_EXPENSE + " WHERE " + COLUMN_DATE + "='" + product.getDate() + "'";
-
-            c = db.rawQuery(query, null);
-            c.moveToFirst();
-
-            String s = "UPDATE " + TABLE_EXPENSE + " SET " + COLUMN_EXP + "='" + (product.getMoney() + Integer.parseInt(c.getString(3))) + "' WHERE " + COLUMN_DATE + "='" + product.getDate() + "';";
+            String s = "UPDATE " + TABLE_INCOME + " SET " + COLUMN_ATM + "='" + product.getMoney()  + "' WHERE " + COLUMN_DATE + "='" + product.getDate() + "';";
             c = db.rawQuery(s, null);
             c.moveToFirst();//It is important
+            //Log.d("d", "UPDATED!!!");
         }
-
     }
 
-    public String shoToATM(ATM product){
+    public String shoToATM( int x){
         SQLiteDatabase db = getWritableDatabase();
         Cursor c = null;
-        String returnString = "No data found!!!";
+        String returnString = "...\n";
+        int totalSum=0;
 
-        if(!isExist(String.valueOf(product.getDate()), TABLE_INCOME )) {
+            //Log.d("d", "isExist-->");
             String query = " SELECT * FROM " + TABLE_INCOME + " WHERE 1=1 ";
-            try {
+
                 c = db.rawQuery(query, null);
                 c.moveToFirst();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 
             while (!c.isAfterLast()) {
                 if (c.getString(c.getColumnIndex(COLUMN_ATM)) != null && c.getString(c.getColumnIndex(COLUMN_DATE)) != null) {
                     returnString += c.getString(c.getColumnIndex(COLUMN_ATM)) + "<-->" + c.getString(c.getColumnIndex(COLUMN_DATE)) + "\n";
+                    totalSum += Integer.parseInt(c.getString(c.getColumnIndex(COLUMN_ATM)));
                 }
                 c.moveToNext();
             }
-        }
-        db.close();
-        return returnString;
+
+       // //Log.d("d", returnString+"<-- This should be displayed!!!");
+
+        if(x==1) return returnString;
+        else return ""+totalSum;
     }
 
     //For Date
     String doubleDigit(String x){
-        if(x.length() == 1)
-            return "0"+x;
-        else
-            return x ;
+        return (x.length() == 1)?"0"+x:x;
     }
+
+    public int MyBalance(){
+
+        DataOfATM.balance = Integer.parseInt(shoToATM(0)) - Integer.parseInt(databsetoString(0))  ;
+
+        return  DataOfATM.balance;
+    }
+
 }
