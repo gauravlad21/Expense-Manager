@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -57,7 +58,7 @@ public class DayData extends Activity{
         bShow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dbHelper.showDetail(etForDate.getText().toString(), tvData);
+                tvData.setText(dbHelper.showDetail(etForDate.getText().toString()));
             }
         });
 
@@ -88,6 +89,13 @@ public class DayData extends Activity{
         });
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
+
+        try {
+            dbHelper.copyAppDbFromFolder(getApplicationContext());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
     //----------end of onCreate Method!!!

@@ -13,25 +13,32 @@ import android.support.design.widget.Snackbar;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewStub;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
 
-public class InputData extends Activity {
+public class InputData extends Activity implements  AdapterView.OnItemSelectedListener {
 
     DBHelper dbHelper;
     Button bAdd, bMinus;
-    EditText etInput,  etComment;
+    EditText etInput;
     Calendar calendar;
     int month, day, year;
     TextView tv, etInputDate,tvForbalance;
     SharedPreferences sharedPreferences;
+    Spinner spinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +49,6 @@ public class InputData extends Activity {
         bMinus = (Button) findViewById(R.id.bMinus);
         etInputDate = (TextView)findViewById(R.id.etInputDate);
         etInput = (EditText)findViewById(R.id.etInput);
-        etComment = (EditText)findViewById(R.id.etComment);
         tv = (TextView)findViewById(R.id.tv);
         tvForbalance = (TextView)findViewById(R.id.tvForBalance);
         sharedPreferences = getSharedPreferences("BalanceFile", Context.MODE_PRIVATE);
@@ -59,6 +65,30 @@ public class InputData extends Activity {
 
         tv.setMovementMethod(new ScrollingMovementMethod());
 
+        spinner = (Spinner) findViewById(R.id.spinner);
+        spinner.setOnItemSelectedListener( this);
+
+        ArrayList<String> categories = new ArrayList<String>();
+        categories.add("Food");
+        categories.add("Movie");
+        categories.add("Daily Usage");
+        categories.add("Travel");
+        categories.add("Hotel/Restaurant");
+        categories.add("Shopping/Online Shopping");
+        categories.add("Medical");
+        categories.add("Other");
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.sppinner_title , categories);
+
+        adapter.setDropDownViewResource(R.layout.spinner_layout);
+
+        spinner.setAdapter(adapter);
+
+        try {
+            dbHelper.copyAppDbFromFolder(getApplicationContext());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setDate(View view) {
@@ -95,14 +125,14 @@ public class InputData extends Activity {
 
     public void addButtonClick(View view){
         if (etInput.getText().toString().length() != 0  ) {//why etInput.getText().toString() is not working?
-            Expense expense = new Expense(etInputDate.getText().toString(), etInput.getText().toString(), etComment.getText().toString());
+            Expense expense = new Expense(etInputDate.getText().toString(), etInput.getText().toString(), spinner.getSelectedItem().toString());
             dbHelper.addMoney(expense);
             Toast.makeText(getApplicationContext(), "Added!!!", Toast.LENGTH_SHORT).show();
 
             Log.d("d", dbHelper.MyBalance()+"<---This is value after adding expense!!!");
 
             DataOfATM.balance = dbHelper.MyBalance();
-            tvForbalance.setText(dbHelper.MyBalance()+"");
+            tvForbalance.setText("Your Balance is: "+dbHelper.MyBalance()+"");
             printDatabase();
         }else{
             Snackbar snackbar = Snackbar.make(view, "Fill Expense!!!", Snackbar.LENGTH_SHORT);
@@ -121,11 +151,11 @@ public class InputData extends Activity {
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface arg0, int arg1) {
-                            Expense expense = new Expense(etInputDate.getText().toString(), etInput.getText().toString(), etComment.getText().toString());
+                            Expense expense = new Expense(etInputDate.getText().toString(), etInput.getText().toString(), spinner.getSelectedItem().toString());
                             dbHelper.MinusMoney(expense);
                             Toast.makeText(getApplicationContext(), "Minus!!!", Toast.LENGTH_SHORT).show();
                             DataOfATM.balance = dbHelper.MyBalance();
-                            tvForbalance.setText(dbHelper.MyBalance()+"");
+                            tvForbalance.setText("Your Balance is: "+dbHelper.MyBalance()+"");
                             printDatabase();
                         }
                     });
@@ -150,18 +180,19 @@ public class InputData extends Activity {
 
     public void deleteButtonClick(View view){
         final String input = etInputDate.getText().toString();
+        final String inputComment = spinner.getSelectedItem().toString();
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setMessage("Are you sure you want delete data from "+ input +" date?");
+        alertDialogBuilder.setMessage("Are you sure you want delete data from "+ input +" date and comment -->" + inputComment + "?");
 
         alertDialogBuilder.setPositiveButton("Yes",
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface arg0, int arg1) {
-                        dbHelper.deleteMoney(input);
+                        dbHelper.deleteMoney(input, inputComment);
                         Toast.makeText(getApplicationContext(), "Deleted!!!", Toast.LENGTH_SHORT).show();
                         DataOfATM.balance = dbHelper.MyBalance();
-                        tvForbalance.setText(dbHelper.MyBalance()+"");
+                        tvForbalance.setText("Yoyr Balance is:"+dbHelper.MyBalance()+"");
                         printDatabase();
                     }
                 });
@@ -179,7 +210,7 @@ public class InputData extends Activity {
         alertDialog.show();
 
         DataOfATM.balance = dbHelper.MyBalance();
-        tvForbalance.setText(dbHelper.MyBalance()+"");
+        tvForbalance.setText("Your Balance is: "+dbHelper.MyBalance()+"");
 
     }
 
@@ -190,6 +221,13 @@ public class InputData extends Activity {
 
     @Override
     public void onBackPressed() {
+
+        try {
+            dbHelper.copyAppDbToDownloadFolder(getApplicationContext());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt("Balance", DataOfATM.balance);
         editor.commit();
@@ -198,4 +236,19 @@ public class InputData extends Activity {
         Intent i = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(i);
     }
+
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+        String item = parent.getItemAtPosition(position).toString();
+
+        Toast.makeText(parent.getContext(), "Selected: " + item, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
 }

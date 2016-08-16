@@ -20,6 +20,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -80,6 +81,12 @@ public class DataOfATM extends Activity {
         editor.putInt("Balance", balance);
         editor.commit();
         Log.d("d", "This balance is in onCreate method!!!");
+
+        try {
+            dbHelper.copyAppDbFromFolder(getApplicationContext());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setDate(View view) {
@@ -157,6 +164,15 @@ public class DataOfATM extends Activity {
                     snackbar.show();
                 }
 
+        try {
+            dbHelper.copyAppDbToDownloadFolder(getApplicationContext());
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.d("d", "Error with copyAppDbToDownloadFolder");
+        }
+       // dbHelper.exportDB();
+        Log.d("d", "export from datafATM!!!");
+
     }
 
     public void onShowATM(){
@@ -166,6 +182,13 @@ public class DataOfATM extends Activity {
 
     @Override
     public void onBackPressed() {
+
+        try {
+            dbHelper.copyAppDbToDownloadFolder(getApplicationContext());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         finish();
         Intent i = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(i);
