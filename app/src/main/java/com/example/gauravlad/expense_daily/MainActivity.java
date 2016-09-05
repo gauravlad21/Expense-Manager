@@ -1,10 +1,14 @@
 package com.example.gauravlad.expense_daily;
 
+import android.Manifest;
 import android.app.NotificationManager;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
@@ -13,8 +17,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.io.IOException;
+
 public class MainActivity extends AppCompatActivity {
 
+    private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
+    DBHelper dbHelper;
     Button bDay, bData, bATM;
     NotificationManager notificationManager;
     int notifyId = 33, value = 0 ;
@@ -24,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        dbHelper = new DBHelper(getApplicationContext(), null, null, 1);
 
         bDay = (Button) findViewById(R.id.bByDay);
         bData = (Button) findViewById(R.id.bData);
@@ -62,6 +72,34 @@ public class MainActivity extends AppCompatActivity {
             if(isNoticActive){
                 notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                 notificationManager.cancel(notifyId);
+            }
+        }
+
+
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+
+                Toast.makeText(getApplicationContext(), "Ask for Permission!!!", Toast.LENGTH_SHORT).show();
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+                try {
+                    dbHelper.copyAppDbFromFolder();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
             }
         }
 
@@ -116,6 +154,42 @@ public class MainActivity extends AppCompatActivity {
 
 }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+
+
+        Log.d("d", "onRequestPermissionsResult!!!!");
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    Toast.makeText(getApplicationContext(), "Permission granted!!!", Toast.LENGTH_SHORT).show();
+
+                    try {
+                        dbHelper.copyAppDbFromFolder();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+
+                } else {
+                    Toast.makeText(getApplicationContext(), "Denieded!!!", Toast.LENGTH_SHORT).show();
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+
+    }
 
 
 

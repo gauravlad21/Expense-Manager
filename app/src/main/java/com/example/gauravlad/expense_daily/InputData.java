@@ -1,5 +1,6 @@
 package com.example.gauravlad.expense_daily;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -8,8 +9,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
@@ -31,6 +35,7 @@ import java.util.Date;
 
 public class InputData extends Activity implements  AdapterView.OnItemSelectedListener {
 
+    private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
     DBHelper dbHelper;
     Button bAdd, bMinus;
     EditText etInput;
@@ -84,11 +89,6 @@ public class InputData extends Activity implements  AdapterView.OnItemSelectedLi
 
         spinner.setAdapter(adapter);
 
-        try {
-            dbHelper.copyAppDbFromFolder(getApplicationContext());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public void setDate(View view) {
@@ -119,13 +119,13 @@ public class InputData extends Activity implements  AdapterView.OnItemSelectedLi
     };
 
     private void showDate(int year, int month, int day) {
-        etInputDate.setText(new StringBuilder().append(dbHelper.doubleDigit(""+year)).append("/")
-                .append(dbHelper.doubleDigit(""+month)).append("/").append(dbHelper.doubleDigit(""+day)));
+        etInputDate.setText(new StringBuilder().append(dbHelper.doubleDigit(""+day)).append("/")
+                .append(dbHelper.doubleDigit(""+month)).append("/").append(year));
     }
 
     public void addButtonClick(View view){
         if (etInput.getText().toString().length() != 0  ) {//why etInput.getText().toString() is not working?
-            Expense expense = new Expense(etInputDate.getText().toString(), etInput.getText().toString(), spinner.getSelectedItem().toString());
+            Expense expense = new Expense(dbHelper.changeDateOrder(etInputDate.getText().toString()), etInput.getText().toString(), spinner.getSelectedItem().toString());
             dbHelper.addMoney(expense);
             Toast.makeText(getApplicationContext(), "Added!!!", Toast.LENGTH_SHORT).show();
 
@@ -134,6 +134,13 @@ public class InputData extends Activity implements  AdapterView.OnItemSelectedLi
             DataOfATM.balance = dbHelper.MyBalance();
             tvForbalance.setText("Your Balance is: "+dbHelper.MyBalance()+"");
             printDatabase();
+
+            try {
+                dbHelper.copyAppDbToDownloadFolder();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }else{
             Snackbar snackbar = Snackbar.make(view, "Fill Expense!!!", Snackbar.LENGTH_SHORT);
             snackbar.show();
@@ -157,6 +164,12 @@ public class InputData extends Activity implements  AdapterView.OnItemSelectedLi
                             DataOfATM.balance = dbHelper.MyBalance();
                             tvForbalance.setText("Your Balance is: "+dbHelper.MyBalance()+"");
                             printDatabase();
+
+                            try {
+                                dbHelper.copyAppDbToDownloadFolder();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
                     });
 
@@ -194,6 +207,12 @@ public class InputData extends Activity implements  AdapterView.OnItemSelectedLi
                         DataOfATM.balance = dbHelper.MyBalance();
                         tvForbalance.setText("Yoyr Balance is:"+dbHelper.MyBalance()+"");
                         printDatabase();
+
+                        try {
+                            dbHelper.copyAppDbToDownloadFolder();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
 
@@ -221,13 +240,13 @@ public class InputData extends Activity implements  AdapterView.OnItemSelectedLi
 
     @Override
     public void onBackPressed() {
-
+/*
         try {
             dbHelper.copyAppDbToDownloadFolder(getApplicationContext());
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+*/
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt("Balance", DataOfATM.balance);
         editor.commit();

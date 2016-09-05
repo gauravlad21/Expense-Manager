@@ -71,7 +71,7 @@ public class DayData extends Activity{
                 }else{
                     String s = "/"+dbHelper.doubleDigit(dataMonth)+"/";
                     Log.d("d", s);
-                    tvData2.setText( "Your Expenses in " + whichMonth(dataMonth) +" month is : " + dbHelper.dataFromMonth(s) ); //why i cant sent textview in other class method??
+                    tvData2.setText( "Your Expenses in " + whichMonth(dataMonth) +" month is : " + dbHelper.dataFromMonth(s,0) + "\n" + dbHelper.dataFromMonth(s,1) + "% of your total expense."); //why i cant sent textview in other class method??
                 }
             }
         });
@@ -82,7 +82,7 @@ public class DayData extends Activity{
                 String from = etFrom.getText().toString();
                 String to = etTo.getText().toString();
 
-                tvShooow.setText( dbHelper.showDataBetweenTwoDates(from , to) + "" );
+                tvShooow.setText( dbHelper.showDataBetweenTwoDates(from , to, 0) + "\n" + dbHelper.showDataBetweenTwoDates(from , to, 1) + "% of expense of all expense." );
 
                 Log.d("d", "Entered in DataBetweenTwoDates!!!");
             }
@@ -92,7 +92,7 @@ public class DayData extends Activity{
 
 
         try {
-            dbHelper.copyAppDbFromFolder(getApplicationContext());
+            dbHelper.copyAppDbFromFolder();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -138,16 +138,16 @@ public class DayData extends Activity{
     private void showDate(int year, int month, int day) {
         switch (idOfDialogue) {
             case 99: {
-                etForDate.setText(new StringBuilder().append(dbHelper.doubleDigit("" + year)).append("/")
-                        .append(dbHelper.doubleDigit("" + month)).append("/").append(dbHelper.doubleDigit("" + day)));
+                etForDate.setText(new StringBuilder().append(dbHelper.doubleDigit("" + day)).append("/")
+                        .append(dbHelper.doubleDigit("" + month)).append("/").append(dbHelper.doubleDigit("" + year)));
                 break;
             }case 33:{
-                etFrom.setText(new StringBuilder().append(dbHelper.doubleDigit("" + year)).append("/")
-                        .append(dbHelper.doubleDigit("" + month)).append("/").append(dbHelper.doubleDigit("" + day)));
+                etFrom.setText(new StringBuilder().append(dbHelper.doubleDigit("" + day)).append("/")
+                        .append(dbHelper.doubleDigit("" + month)).append("/").append(dbHelper.doubleDigit("" + year)));
                 break;
             }case 11:{
-                etTo.setText(new StringBuilder().append(dbHelper.doubleDigit("" + year)).append("/")
-                        .append(dbHelper.doubleDigit("" + month)).append("/").append(dbHelper.doubleDigit("" + day)));
+                etTo.setText(new StringBuilder().append(dbHelper.doubleDigit("" + day)).append("/")
+                        .append(dbHelper.doubleDigit("" + month)).append("/").append(dbHelper.doubleDigit("" + year)));
                 break;
             }
         }

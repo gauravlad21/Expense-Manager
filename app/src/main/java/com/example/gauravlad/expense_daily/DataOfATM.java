@@ -1,5 +1,6 @@
 package com.example.gauravlad.expense_daily;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -8,8 +9,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
@@ -20,12 +25,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 
 public class DataOfATM extends Activity {
 
+    private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
     static int balance;
     Calendar calendar;
     int year, month,day;
@@ -71,7 +78,13 @@ public class DataOfATM extends Activity {
         bShowAtm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onShowATM();
+                try{
+                    onShowATM();
+                }catch (Exception e){
+                    e.printStackTrace();
+                    Snackbar snackbar = Snackbar.make(v, "Fill the ATM or Expense!!!", Snackbar.LENGTH_SHORT);
+                    snackbar.show();
+                }
             }
         });
 
@@ -82,11 +95,35 @@ public class DataOfATM extends Activity {
         editor.commit();
         Log.d("d", "This balance is in onCreate method!!!");
 
+
         try {
-            dbHelper.copyAppDbFromFolder(getApplicationContext());
+            dbHelper.copyAppDbFromFolder();
+            Log.d("d", "dbHelper.copyAppDbFromFolder(getApplicationContext());<<---- in DataOfATM!!!");
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+
+                Toast.makeText(getApplicationContext(), "Ask for Permission!!!", Toast.LENGTH_SHORT).show();
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+
+            }
+        }
+
     }
 
     public void setDate(View view) {
@@ -117,62 +154,57 @@ public class DataOfATM extends Activity {
     };
 
     private void showDate(int year, int month, int day) {
-        tvDateOfATM.setText(new StringBuilder().append(dbHelper.doubleDigit(""+year)).append("/").append(dbHelper.doubleDigit(""+month)).append("/").append(dbHelper.doubleDigit(""+day)));
+        String s = new StringBuilder().append(dbHelper.doubleDigit(dbHelper.doubleDigit(""+day))).append("/").append(dbHelper.doubleDigit(""+month)).append("/").append(year).toString();
+        tvDateOfATM.setText(s);
     }
 
     public void onClickATM(View view){
 
-                if (etATM.getText().toString().length() != 0  ) {//why etInput.getText().toString() is not working?
+        if (etATM.getText().toString().length() != 0  ) {//why etInput.getText().toString() is not working?
 
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-                    alertDialogBuilder.setMessage("Are you sure you want to increse amount in ATM???");
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+                alertDialogBuilder.setMessage("Are you sure you want to increse amount in ATM???");
 
-                    alertDialogBuilder.setPositiveButton("Yes",
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface arg0, int arg1) {
+                alertDialogBuilder.setPositiveButton("Yes",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface arg0, int arg1) {
 
-                                    ATM atm = new ATM( etATM.getText().toString(), tvDateOfATM.getText().toString() );
-                                    dbHelper.addToATM(atm);
-                                    tvATMshow.setText(dbHelper.shoToATM( 1 ));
-                                    Toast.makeText(getApplicationContext(), "Added in ATM", Toast.LENGTH_SHORT).show();
-                                    //Log.d("d","Enters in onClickATM!!!");
+                                ATM atm = new ATM( etATM.getText().toString(), dbHelper.changeDateOrder(tvDateOfATM.getText().toString()) );
+                                dbHelper.addToATM(atm);
+                                tvATMshow.setText(dbHelper.shoToATM( 1 ));
+                                Toast.makeText(getApplicationContext(), "Added in ATM", Toast.LENGTH_SHORT).show();
+                                //Log.d("d","Enters in onClickATM!!!");
 
-                                    balance = dbHelper.MyBalance();
-                                    tv.setText("Your Current Balance is :"+ balance);
+                                Log.d("d", dbHelper.shoToATM(0)+" <<<<<<<<<<<<<-----------added in ATM");
+                                balance = dbHelper.MyBalance();
+                                tv.setText("Your Current Balance is :"+ balance);
 
-                                    SharedPreferences.Editor editor = sharedpreferences.edit();
-                                    editor.putInt("Balance", balance);
-                                    editor.commit();
+                                SharedPreferences.Editor editor = sharedpreferences.edit();
+                                editor.putInt("Balance", balance);
+                                editor.commit();
 
-                                    //Toast.makeText(getApplicationContext(), "Msg Should be disappear!!!", Toast.LENGTH_LONG).show();
-
+                                try {
+                                    dbHelper.copyAppDbToDownloadFolder();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
                                 }
-                            });
+                            }
+                        });
 
-                    alertDialogBuilder.setNegativeButton("No",
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface arg0, int arg1) {
-                                    Toast.makeText(getApplicationContext(), "You Safe!!!", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                    AlertDialog alertDialog = alertDialogBuilder.create();
-                    alertDialog.show();
-                }else{
-                    Snackbar snackbar = Snackbar.make(view, "Fill ATM money!!!", Snackbar.LENGTH_SHORT);
-                    snackbar.show();
-                }
-
-        try {
-            dbHelper.copyAppDbToDownloadFolder(getApplicationContext());
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.d("d", "Error with copyAppDbToDownloadFolder");
+                alertDialogBuilder.setNegativeButton("No",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface arg0, int arg1) {
+                                Toast.makeText(getApplicationContext(), "You Safe!!!", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+        }else{
+            Snackbar snackbar = Snackbar.make(view, "Fill ATM money!!!", Snackbar.LENGTH_SHORT);
+            snackbar.show();
         }
-       // dbHelper.exportDB();
-        Log.d("d", "export from datafATM!!!");
-
     }
 
     public void onShowATM(){
@@ -183,14 +215,10 @@ public class DataOfATM extends Activity {
     @Override
     public void onBackPressed() {
 
-        try {
-            dbHelper.copyAppDbToDownloadFolder(getApplicationContext());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         finish();
         Intent i = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(i);
+
     }
+
 }
