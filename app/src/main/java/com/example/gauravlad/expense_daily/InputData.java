@@ -35,7 +35,6 @@ import java.util.Date;
 
 public class InputData extends Activity implements  AdapterView.OnItemSelectedListener {
 
-    private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
     DBHelper dbHelper;
     Button bAdd, bMinus;
     EditText etInput;

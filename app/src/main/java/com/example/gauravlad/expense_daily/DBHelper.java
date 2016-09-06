@@ -25,6 +25,8 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String COLUMN_COMMENT = "_comment";
     private static final String COLUMN_EXP = "_exp";//manual input
     private static boolean exist = false;
+    private static boolean interalExist = false;
+    File internalFile, file;
 
     public DBHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, DATABASE_NAME, factory, DATABASE_VIRSON);
@@ -35,8 +37,12 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
 
-        File currentDB = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "expense.db");
-        exist = currentDB.exists();
+        file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "expense.db");
+        internalFile= new File ("/data/user/0/com.example.gauravlad.expense_daily/databases/expense.db");
+
+        exist = file.exists();
+        interalExist = internalFile.exists();
+
         Log.d("d", exist + " <---currentDB.exists()");
         if( exist ) {////Toughest THING!!!! :P
             try {
@@ -67,41 +73,50 @@ public class DBHelper extends SQLiteOpenHelper {
     //Add new Row to database
     public void addMoney(Expense product) {
 
+        if (!exist){
+            if (interalExist) {
+                if (!isExistDate(String.valueOf(product.getDate()), product.getComment(), TABLE_EXPENSE)) {
+                    SQLiteDatabase db = getWritableDatabase();
+                    ContentValues values = new ContentValues();
+                    values.put(COLUMN_DATE, String.valueOf(product.getDate()));
+                    values.put(COLUMN_EXP, (product.getMoney()));
+                    values.put(COLUMN_COMMENT, product.getComment());
+                    db.insert(TABLE_EXPENSE, null, values);
+                } else {
+                    Log.d("d", String.valueOf(product.getMoney()) + " new");
+                    SQLiteDatabase db = getWritableDatabase();
 
-        if (!isExistDate(String.valueOf(product.getDate()), product.getComment(), TABLE_EXPENSE)) {
-            SQLiteDatabase db = getWritableDatabase();
-            ContentValues values = new ContentValues();
-            values.put(COLUMN_DATE, String.valueOf(product.getDate()));
-            values.put(COLUMN_EXP, (product.getMoney()));
-            values.put(COLUMN_COMMENT, product.getComment());
-            db.insert(TABLE_EXPENSE, null, values);
+                    String query = "SELECT * FROM " + TABLE_EXPENSE + " WHERE " + COLUMN_DATE + " ='" + product.getDate() + "' AND " + COLUMN_COMMENT + " = '" + product.getComment() + "';";
 
+                    Cursor c = db.rawQuery(query, null);
+                    c.moveToFirst();
 
-        } else {
-            Log.d("d", String.valueOf(product.getMoney()) + " new");
-            SQLiteDatabase db = getWritableDatabase();
+                    int va = (product.getMoney() + Integer.parseInt(c.getString(c.getColumnIndex(COLUMN_EXP))));
+                    String s = "UPDATE " + TABLE_EXPENSE + " SET " + COLUMN_EXP + " = '" + va + "' WHERE " + COLUMN_DATE + " ='" + product.getDate() + "' AND " + COLUMN_COMMENT + " = '" + product.getComment() + "';";
+                    c = db.rawQuery(s, null);
+                    c.moveToFirst();//It is important
 
-            String query = "SELECT * FROM " + TABLE_EXPENSE + " WHERE " + COLUMN_DATE + " ='" + product.getDate() + "' AND " + COLUMN_COMMENT + " = '" + product.getComment() + "';";
-
-            Cursor c = db.rawQuery(query, null);
-            c.moveToFirst();
-
-            int va = (product.getMoney() + Integer.parseInt(c.getString(c.getColumnIndex(COLUMN_EXP))));
-            String s = "UPDATE " + TABLE_EXPENSE + " SET " + COLUMN_EXP + " = '" + va + "' WHERE " + COLUMN_DATE + " ='" + product.getDate() + "' AND " + COLUMN_COMMENT + " = '" + product.getComment() + "';";
-            c = db.rawQuery(s, null);
-            c.moveToFirst();//It is important
-
-           // Log.d("d", va+"<----new!!!");
+                    // Log.d("d", va+"<----new!!!");
+                }
+            }
+        }else{
+            try {
+                copyAppDbFromFolder();
+                //onUpgrade((SQLiteDatabase) internalFile, 1, 1);
+                //return;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            addMoney(product);
         }
-
     }
 
     public void MinusMoney(Expense product){
 
         if(isExistDate(changeDateOrder(String.valueOf(product.getDate())), product.getComment() , TABLE_EXPENSE )  ) {
 
-          Log.d("d", "Already Exist!!!");
-           Log.d("d", String.valueOf(product.getMoney())+" new");
+            Log.d("d", "Already Exist!!!");
+            Log.d("d", String.valueOf(product.getMoney())+" new");
             SQLiteDatabase db =  getWritableDatabase();
 
             String query = "SELECT * FROM " + TABLE_EXPENSE + " WHERE " + COLUMN_DATE + "='" + changeDateOrder(product.getDate()) + "' AND " + COLUMN_COMMENT + "='" + product.getComment() + "';";
@@ -116,7 +131,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 c = db.rawQuery(s, null);
                 c.moveToFirst();//It is important
             }else {
-               Log.d("d", "Couldn't be done because subtraction is more!!!");
+                Log.d("d", "Couldn't be done because subtraction is more!!!");
                 //do nothing
             }
         }
@@ -150,53 +165,40 @@ public class DBHelper extends SQLiteOpenHelper {
         int ans = 0;
         String dbString = "";
 
-       // Log.d("d", "DatabaseToString!!!");
-      //  if (exist) {
+        SQLiteDatabase db = getWritableDatabase();
+        String query = "SELECT * FROM " + TABLE_EXPENSE + " ORDER BY " + COLUMN_DATE + " DESC";
 
-            SQLiteDatabase db = getWritableDatabase();
-            String query = "SELECT * FROM " + TABLE_EXPENSE + " ORDER BY " + COLUMN_DATE + " DESC";
+        //CURSOR POINT TO A LOCATION IN YOUR RESULTS
+        Cursor c = db.rawQuery(query, null);
+        //Move to first row in your result
+        c.moveToFirst();
 
-            //CURSOR POINT TO A LOCATION IN YOUR RESULTS
-            Cursor c = db.rawQuery(query, null);
-            //Move to first row in your result
-            c.moveToFirst();
-
-            while (!c.isAfterLast()) {
-                if (c.getString(c.getColumnIndex(COLUMN_EXP)) != null && c.getString(c.getColumnIndex(COLUMN_COMMENT)) != null && c.getString(c.getColumnIndex(COLUMN_DATE)) != null) {
-                    dbString += c.getString(c.getColumnIndex(COLUMN_EXP)) + "..."+ changeDateOrder(c.getString(c.getColumnIndex(COLUMN_DATE))) + "..." + c.getString(c.getColumnIndex(COLUMN_COMMENT))  ;
-                    dbString += "\n";
-                    ans += Integer.parseInt(c.getString(c.getColumnIndex(COLUMN_EXP)));
-                }
-                c.moveToNext();
+        while (!c.isAfterLast()) {
+            if (c.getString(c.getColumnIndex(COLUMN_EXP)) != null && c.getString(c.getColumnIndex(COLUMN_COMMENT)) != null && c.getString(c.getColumnIndex(COLUMN_DATE)) != null) {
+                dbString += c.getString(c.getColumnIndex(COLUMN_EXP)) + "..."+ changeDateOrder(c.getString(c.getColumnIndex(COLUMN_DATE))) + "..." + c.getString(c.getColumnIndex(COLUMN_COMMENT))  ;
+                dbString += "\n";
+                ans += Integer.parseInt(c.getString(c.getColumnIndex(COLUMN_EXP)));
             }
-            //Log.d("d", "...\n"+dbString+"...");
-            c.close();
-     //   }else {
-/*
-            try {
-                copyAppDbToDownloadFolder();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            c.moveToNext();
+        }
+        c.close();
 
-            return databsetoString(x);*/
-       // }
         return (x == 1) ? dbString : "" + ans;
     }
     // if record is exist then it will return true otherwise this method returns false
     public boolean isExistDate(String date, String comment , String Table) {
-       // Log.d("d", "Entered in isExist--->>>" + date + " " + comment + " ;");
+        // Log.d("d", "Entered in isExist--->>>" + date + " " + comment + " ;");
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cur = db.rawQuery("SELECT * FROM " + Table + " WHERE " + COLUMN_DATE + "='" + date + "' AND " + COLUMN_COMMENT + "='" + comment + "';", null);/////DO NOT PUT SPACE AFTER & BEFORE ='<TEXT>'----------------
         boolean exist = (cur.getCount() > 0);
         cur.close();
 
-       // Log.d("d", exist+"");
+        // Log.d("d", exist+"");
         return exist;
     }
 
     public boolean isExistATM(String date,  String Table) {
-       // Log.d("d", "Entered in isExist--->>>" + date + " ;");
+        // Log.d("d", "Entered in isExist--->>>" + date + " ;");
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cur = db.rawQuery("SELECT * FROM " + Table + " WHERE " + COLUMN_DATE + "='" + date + "'" , null);/////DO NOT PUT SPACE AFTER & BEFORE ='<TEXT>'----------------
         boolean exist = (cur.getCount() > 0);
@@ -219,13 +221,13 @@ public class DBHelper extends SQLiteOpenHelper {
             c.moveToFirst();
 
             while(!c.isAfterLast()){
-                    s += c.getString(c.getColumnIndex(COLUMN_EXP)) +"..."+ c.getString(c.getColumnIndex(COLUMN_COMMENT));
-                    s += "\n";
-                    ans += Integer.parseInt(c.getString(c.getColumnIndex(COLUMN_EXP)));
+                s += c.getString(c.getColumnIndex(COLUMN_EXP)) +"..."+ c.getString(c.getColumnIndex(COLUMN_COMMENT));
+                s += "\n";
+                ans += Integer.parseInt(c.getString(c.getColumnIndex(COLUMN_EXP)));
                 c.moveToNext();
             }
-        c.moveToFirst();
-           return " Your amount on " + date + " is: " + ans + "\n Your detail is: \n  " + s;
+            c.moveToFirst();
+            return " Your amount on " + date + " is: " + ans + "\n Your detail is: \n  " + s;
         }else{
             //Log.d("d", "No data found!!!");
         }
@@ -297,11 +299,11 @@ public class DBHelper extends SQLiteOpenHelper {
             values.put(COLUMN_DATE, String.valueOf(product.getDate()));
             values.put(COLUMN_ATM, String.valueOf(product.getMoney()));
 
-           // //Log.e("d", "insert!!!!");
+            // //Log.e("d", "insert!!!!");
             db.insert(TABLE_INCOME, null, values);
-    } else {
+        } else {
             Cursor c=null;
-           // //Log.d("d", "Already Exist!!!");
+            // //Log.d("d", "Already Exist!!!");
             ////Log.d("d", String.valueOf(product.getMoney()) + " new");
 
             String s = "UPDATE " + TABLE_INCOME + " SET " + COLUMN_ATM + "='" + product.getMoney()  + "' WHERE " + COLUMN_DATE + "='" + product.getDate() + "';";
@@ -338,14 +340,14 @@ public class DBHelper extends SQLiteOpenHelper {
                 }
             }
             // //Log.d("d", returnString+"<-- This should be displayed!!!");
-   }else{
+        }else{
             try {
                 copyAppDbFromFolder();
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-           // return databsetoString(x);
+            // return databsetoString(x);
 
         }
         if (x == 1) return returnString;
@@ -388,7 +390,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public void copyAppDbFromFolder() throws IOException {
         File currentDB = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "expense.db"); // for example "my_data_backup.db"
-        //File backupDB = context.getDatabasePath("expense.db"); //databaseName=your current application database name, for example "my_data.db"
         File backupDB = new File ("/data/user/0/com.example.gauravlad.expense_daily/databases/expense.db");
 
         Log.d("d", "copyAppDbFromFolder-->>"+currentDB.exists());
